@@ -110,6 +110,11 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right win
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+
+vim.keymap.set("x", "<leader>p", [["_dP]])
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -315,11 +320,18 @@ require("lazy").setup({
 							["<C-h>"] = "to_fuzzy_refine",
 						},
 					},
-				},
-				-- pickers = {}
-				extensions = {
-					["ui-select"] = {
-						require("telescope.themes").get_dropdown(),
+
+					layout_strategy = "horizontal",
+					layout_config = {
+						height = 0.99,
+						width = 0.99,
+					},
+
+					-- pickers = {}
+					extensions = {
+						["ui-select"] = {
+							require("telescope.themes").get_dropdown(),
+						},
 					},
 				},
 			})
@@ -420,7 +432,12 @@ require("lazy").setup({
 					map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
 
 					-- Find references for the word under your cursor.
-					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+					map("gr", function()
+						require("telescope.builtin").lsp_references({
+							include_declaration = false,
+							show_line = false,
+						})
+					end, "[G]oto [R]eferences")
 
 					-- Jump to the implementation of the word under your cursor.
 					--  Useful when your language has ways of declaring types without an actual implementation.
