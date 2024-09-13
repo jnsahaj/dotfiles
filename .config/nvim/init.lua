@@ -1,7 +1,3 @@
--- Missing
--- 1. Move selected lines
--- 2. Harpoon
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -9,7 +5,7 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -181,8 +177,6 @@ require("lazy").setup({
 		},
 	},
 
-	{ "nvim-tree/nvim-web-devicons" },
-
 	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
 	--
 	-- This is often very useful to both group configuration, as well as handle
@@ -250,6 +244,36 @@ require("lazy").setup({
 				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
 			},
 		},
+	},
+
+	{
+		"ThePrimeagen/harpoon",
+		branch = "harpoon2",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			local harpoon = require("harpoon")
+			harpoon:setup()
+
+			vim.keymap.set("n", "<leader>a", function()
+				harpoon:list():add()
+			end)
+			vim.keymap.set("n", "<C-e>", function()
+				harpoon.ui:toggle_quick_menu(harpoon:list())
+			end)
+
+			vim.keymap.set("n", "<leader>1", function()
+				harpoon:list():select(1)
+			end)
+			vim.keymap.set("n", "<leader>2", function()
+				harpoon:list():select(2)
+			end)
+			vim.keymap.set("n", "<leader>3", function()
+				harpoon:list():select(3)
+			end)
+			vim.keymap.set("n", "<leader>4", function()
+				harpoon:list():select(4)
+			end)
+		end,
 	},
 
 	-- NOTE: Plugins can specify dependencies.
@@ -577,6 +601,14 @@ require("lazy").setup({
 						new_config.cmd = angular_cmd
 					end,
 				},
+
+				tsserver = {
+					init_options = {
+						preferences = {
+							importModuleSpecifierPreference = "relative",
+						},
+					},
+				},
 			}
 
 			-- Ensure the servers and tools above are installed
@@ -795,12 +827,9 @@ require("lazy").setup({
 	},
 
 	{
-		"monkoose/neocodeium",
-		event = "VeryLazy",
+		"supermaven-inc/supermaven-nvim",
 		config = function()
-			local neocodeium = require("neocodeium")
-			neocodeium.setup()
-			vim.keymap.set("i", "<Tab>", neocodeium.accept)
+			require("supermaven-nvim").setup({})
 		end,
 	},
 
