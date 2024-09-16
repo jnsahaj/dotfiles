@@ -111,6 +111,12 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 vim.keymap.set("x", "<leader>p", [["_dP]])
 
+-- Register the mdx filetype
+vim.filetype.add({ extension = { mdx = "mdx" } })
+
+-- Configure treesitter to use the markdown parser for mdx files
+vim.treesitter.language.register("markdown", "mdx")
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -609,6 +615,14 @@ require("lazy").setup({
 						},
 					},
 				},
+
+				astro = {
+					cmd = { "astro-ls", "--stdio" },
+					filetypes = { "astro" },
+					init_options = {
+						typescript = {},
+					},
+				},
 			}
 
 			-- Ensure the servers and tools above are installed
@@ -686,6 +700,7 @@ require("lazy").setup({
 				scss = { "prettier" },
 				html = { "prettier" },
 				astro = { "prettier" },
+				mdx = { "prettier" },
 			},
 		},
 	},
