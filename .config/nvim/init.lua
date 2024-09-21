@@ -1,3 +1,5 @@
+-- missing git conflict plugin
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -24,7 +26,7 @@ vim.opt.mouse = "a"
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
-vim.keymap.set("n", "<leader>gg", "<cmd>:silent !tmux popup -w100\\% -h100\\% -E lazygit<CR>")
+vim.keymap.set("n", "<leader>gg", "<cmd>:silent !tmux popup -B -w100\\% -h100\\% -E lazygit<CR>")
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -113,6 +115,12 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- Register the mdx filetype
 vim.filetype.add({ extension = { mdx = "mdx" } })
+
+-- vim.filetype.add({
+-- 	pattern = {
+-- 		[".*%.component%.html"] = "htmlangular", -- Sets the filetype to `htmlangular` if it matches the pattern
+-- 	},
+-- })
 
 -- Configure treesitter to use the markdown parser for mdx files
 vim.treesitter.language.register("markdown", "mdx")
@@ -423,6 +431,21 @@ require("lazy").setup({
 	},
 	{ "Bilal2453/luvit-meta", lazy = true },
 	{
+		"aliqyan-21/wit.nvim",
+		config = function()
+			require("wit").setup({
+				engine = "duckduckgo",
+				command_search = "Search",
+				command_search_wiki = "SearchWiki",
+				command_search_visual = "SearchVisual",
+			})
+
+			vim.keymap.set("v", "<leader>sv", function()
+				return ":SearchVisual <CR>"
+			end, { expr = true, desc = "[S]earch [V]isual" })
+		end,
+	},
+	{
 		-- Main LSP Configuration
 		"neovim/nvim-lspconfig",
 		dependencies = {
@@ -501,6 +524,8 @@ require("lazy").setup({
 					-- WARN: This is not Goto Definition, this is Goto Declaration.
 					--  For example, in C this would take you to the header.
 					map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+
+					map("<leader>de", vim.diagnostic.open_float, "[D]iagnostics [E]rror")
 
 					-- The following two autocommands are used to highlight references of the
 					-- word under your cursor when your cursor rests there for a little while.
@@ -601,12 +626,12 @@ require("lazy").setup({
 					},
 				},
 
-				angularls = {
-					cmd = angular_cmd,
-					on_new_config = function(new_config, new_root_dir)
-						new_config.cmd = angular_cmd
-					end,
-				},
+				-- angularls = {
+				-- 	cmd = angular_cmd,
+				-- 	on_new_config = function(new_config, new_root_dir)
+				-- 		new_config.cmd = angular_cmd
+				-- 	end,
+				-- },
 
 				tsserver = {
 					init_options = {
@@ -848,6 +873,8 @@ require("lazy").setup({
 		end,
 	},
 
+	{ "akinsho/git-conflict.nvim", version = "*", config = true },
+
 	{ -- Collection of various small independent plugins/modules
 		"echasnovski/mini.nvim",
 		config = function()
@@ -929,7 +956,7 @@ require("lazy").setup({
 				"bash",
 				"c",
 				"diff",
-				"html",
+				"angular",
 				"lua",
 				"luadoc",
 				"markdown",
@@ -966,7 +993,7 @@ require("lazy").setup({
 	--  Here are some example plugins that I've included in the Kickstart repository.
 	--  Uncomment any of the lines below to enable them (you will need to restart nvim).
 	--
-	-- require 'kickstart.plugins.debug',
+	-- require("kickstart.plugins.debug"),
 	-- require 'kickstart.plugins.indent_line',
 	-- require 'kickstart.plugins.lint',
 	-- require 'kickstart.plugins.autopairs',
