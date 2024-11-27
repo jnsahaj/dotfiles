@@ -186,6 +186,56 @@ require("lazy").setup({
 				topdelete = { text = "‾" },
 				changedelete = { text = "~" },
 			},
+			on_attach = function(bufnr)
+				local gitsigns = require("gitsigns")
+
+				local function map(mode, l, r, opts)
+					opts = opts or {}
+					opts.buffer = bufnr
+					vim.keymap.set(mode, l, r, opts)
+				end
+
+				-- Navigation
+				map("n", "]c", function()
+					if vim.wo.diff then
+						vim.cmd.normal({ "]c", bang = true })
+					else
+						gitsigns.nav_hunk("next")
+					end
+				end, { desc = "Jump to next git [c]hange" })
+
+				map("n", "[c", function()
+					if vim.wo.diff then
+						vim.cmd.normal({ "[c", bang = true })
+					else
+						gitsigns.nav_hunk("prev")
+					end
+				end, { desc = "Jump to previous git [c]hange" })
+
+				-- Actions
+				-- visual mode
+				map("v", "<leader>hs", function()
+					gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "stage git hunk" })
+				map("v", "<leader>hr", function()
+					gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "reset git hunk" })
+				-- normal mode
+				map("n", "<leader>hs", gitsigns.stage_hunk, { desc = "git [s]tage hunk" })
+				map("n", "<leader>hr", gitsigns.reset_hunk, { desc = "git [r]eset hunk" })
+				map("n", "<leader>hS", gitsigns.stage_buffer, { desc = "git [S]tage buffer" })
+				map("n", "<leader>hu", gitsigns.undo_stage_hunk, { desc = "git [u]ndo stage hunk" })
+				map("n", "<leader>hR", gitsigns.reset_buffer, { desc = "git [R]eset buffer" })
+				map("n", "<leader>hp", gitsigns.preview_hunk, { desc = "git [p]review hunk" })
+				map("n", "<leader>hb", gitsigns.blame_line, { desc = "git [b]lame line" })
+				map("n", "<leader>hd", gitsigns.diffthis, { desc = "git [d]iff against index" })
+				map("n", "<leader>hD", function()
+					gitsigns.diffthis("@")
+				end, { desc = "git [D]iff against last commit" })
+				-- Toggles
+				map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[T]oggle git show [b]lame line" })
+				map("n", "<leader>tD", gitsigns.toggle_deleted, { desc = "[T]oggle git show [D]eleted" })
+			end,
 		},
 	},
 
@@ -388,6 +438,10 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
 			vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
+			vim.keymap.set("n", "C-q", function()
+				actions.smart_send_to_qflist()
+				actions.open_qflist()
+			end, { desc = "Smart Send to quickfix list" })
 
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
@@ -633,13 +687,13 @@ require("lazy").setup({
 				-- 	end,
 				-- },
 
-				tsserver = {
-					init_options = {
-						preferences = {
-							importModuleSpecifierPreference = "relative",
-						},
-					},
-				},
+				-- tsserver = {
+				-- 	init_options = {
+				-- 		preferences = {
+				-- 			importModuleSpecifierPreference = "relative",
+				-- 		},
+				-- 	},
+				-- },
 
 				astro = {
 					cmd = { "astro-ls", "--stdio" },
@@ -726,6 +780,7 @@ require("lazy").setup({
 				html = { "prettier" },
 				astro = { "prettier" },
 				mdx = { "prettier" },
+				json = { "prettier" },
 			},
 		},
 	},
@@ -840,10 +895,7 @@ require("lazy").setup({
 		end,
 	},
 
-	{ -- You can easily change to a different colorscheme.
-		-- Change the name of the colorscheme plugin below, and then
-		-- change the command in the config to whatever the name of that colorscheme is.
-		--
+	{
 		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
 		"folke/tokyonight.nvim",
 		priority = 1000, -- Make sure to load this before all the other start plugins.
@@ -866,12 +918,60 @@ require("lazy").setup({
 		opts = { signs = false },
 	},
 
+	-- {
+	-- 	"zbirenbaum/copilot.lua",
+	-- 	cmd = "Copilot",
+	-- 	event = "InsertEnter",
+	-- 	config = function()
+	-- 		require("copilot").setup({
+	-- 			suggestion = {
+	-- 				auto_trigger = true,
+	-- 				keymap = {
+	-- 					accept = "<Tab>",
+	-- 				},
+	-- 			},
+	-- 		})
+	-- 	end,
+	-- },
+
 	{
-		"supermaven-inc/supermaven-nvim",
+		"CopilotC-Nvim/CopilotChat.nvim",
+		branch = "canary",
+		dependencies = {
+			{ "github/copilot.vim" }, -- or
+			{ "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
+		},
+		build = "make tiktoken", -- Only on MacOS or Linux
 		config = function()
-			require("supermaven-nvim").setup({})
+			local chat = require("CopilotChat")
+			chat.setup()
+
+			vim.keymap.set({ "n", "v" }, "<leader>ch", function()
+				chat.open({
+					window = {
+						layout = "float",
+						relative = "cursor",
+						width = 1,
+						height = 0.4,
+						row = 1,
+					},
+					mappings = {
+						close = {
+							normal = "q",
+							insert = "<Esc>",
+						},
+					},
+				})
+			end, { desc = "Copilot [CH]at" })
 		end,
 	},
+
+	-- {
+	-- 	"supermaven-inc/supermaven-nvim",
+	-- 	config = function()
+	-- 		require("supermaven-nvim").setup({})
+	-- 	end,
+	-- },
 
 	{ "akinsho/git-conflict.nvim", version = "*", config = true },
 
@@ -888,6 +988,8 @@ require("lazy").setup({
 			vim.cmd([[highlight TreesitterContextSeparator guifg=#282E44]])
 		end,
 	},
+
+	{ "catppuccin/nvim", name = "catppuccin", priority = 1000 },
 
 	{ -- Collection of various small independent plugins/modules
 		"echasnovski/mini.nvim",
@@ -1012,14 +1114,13 @@ require("lazy").setup({
 	-- require 'kickstart.plugins.lint',
 	-- require 'kickstart.plugins.autopairs',
 	-- require 'kickstart.plugins.neo-tree',
-	-- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
 	--
 	--  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
 	--    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-	-- { import = 'custom.plugins' },
+	-- { import = "custom.plugins" },
 }, {
 	ui = {
 		-- If you are using a Nerd Font: set icons to an empty table which will use the
