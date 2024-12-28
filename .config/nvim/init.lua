@@ -687,13 +687,13 @@ require("lazy").setup({
 				-- 	end,
 				-- },
 
-				-- tsserver = {
-				-- 	init_options = {
-				-- 		preferences = {
-				-- 			importModuleSpecifierPreference = "relative",
-				-- 		},
-				-- 	},
-				-- },
+				ts_ls = {
+					init_options = {
+						preferences = {
+							importModuleSpecifierPreference = "relative",
+						},
+					},
+				},
 
 				astro = {
 					cmd = { "astro-ls", "--stdio" },
@@ -780,6 +780,8 @@ require("lazy").setup({
 				html = { "prettier" },
 				astro = { "prettier" },
 				mdx = { "prettier" },
+				jsx = { "prettier" },
+				tsx = { "prettier" },
 				json = { "prettier" },
 			},
 		},
@@ -934,44 +936,44 @@ require("lazy").setup({
 	-- 	end,
 	-- },
 
-	{
-		"CopilotC-Nvim/CopilotChat.nvim",
-		branch = "canary",
-		dependencies = {
-			{ "github/copilot.vim" }, -- or
-			{ "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
-		},
-		build = "make tiktoken", -- Only on MacOS or Linux
-		config = function()
-			local chat = require("CopilotChat")
-			chat.setup()
-
-			vim.keymap.set({ "n", "v" }, "<leader>ch", function()
-				chat.open({
-					window = {
-						layout = "float",
-						relative = "cursor",
-						width = 1,
-						height = 0.4,
-						row = 1,
-					},
-					mappings = {
-						close = {
-							normal = "q",
-							insert = "<Esc>",
-						},
-					},
-				})
-			end, { desc = "Copilot [CH]at" })
-		end,
-	},
-
 	-- {
-	-- 	"supermaven-inc/supermaven-nvim",
+	-- 	"CopilotC-Nvim/CopilotChat.nvim",
+	-- 	branch = "canary",
+	-- 	dependencies = {
+	-- 		{ "github/copilot.vim" }, -- or
+	-- 		{ "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
+	-- 	},
+	-- 	build = "make tiktoken", -- Only on MacOS or Linux
 	-- 	config = function()
-	-- 		require("supermaven-nvim").setup({})
+	-- 		local chat = require("CopilotChat")
+	-- 		chat.setup()
+	--
+	-- 		vim.keymap.set({ "n", "v" }, "<leader>ch", function()
+	-- 			chat.open({
+	-- 				window = {
+	-- 					layout = "float",
+	-- 					relative = "cursor",
+	-- 					width = 1,
+	-- 					height = 0.4,
+	-- 					row = 1,
+	-- 				},
+	-- 				mappings = {
+	-- 					close = {
+	-- 						normal = "q",
+	-- 						insert = "<Esc>",
+	-- 					},
+	-- 				},
+	-- 			})
+	-- 		end, { desc = "Copilot [CH]at" })
 	-- 	end,
 	-- },
+
+	{
+		"supermaven-inc/supermaven-nvim",
+		config = function()
+			require("supermaven-nvim").setup({})
+		end,
+	},
 
 	{ "akinsho/git-conflict.nvim", version = "*", config = true },
 
@@ -1060,6 +1062,14 @@ require("lazy").setup({
 
 			-- ... and there is more!
 			--  Check out: https://github.com/echasnovski/mini.nvim
+		end,
+	},
+	{
+		"phaazon/mind.nvim",
+		branch = "v2.2",
+		requires = { "nvim-lua/plenary.nvim" },
+		config = function()
+			require("mind").setup()
 		end,
 	},
 	{ -- Highlight, edit, and navigate code
